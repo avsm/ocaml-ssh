@@ -268,7 +268,7 @@ module Methods = struct
     
     (* Given a public key, a hash and a signed version of it, make sure they
        the signed version is valid *)  
-    let verify_rsa_signature (pubkey:Ssh_message.Key.RSA.o) hash signed =
+    let verify_rsa_signature (pubkey:Message.Key.RSA.o) hash signed =
         let n = pubkey#n in
         let key_bits = MP.bits n in
         let key = { Cryptokit.RSA.size=key_bits;

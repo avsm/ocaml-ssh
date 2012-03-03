@@ -19,7 +19,7 @@ open Printf
 open Ssh_utils
 open Ssh_env_t
 
-exception Disconnect_connection of (Ssh_message.Transport.Disconnect.reason_code_t * string)
+exception Disconnect_connection of (Message.Transport.Disconnect.reason_code_t * string)
 exception Unexpected_packet of string
 exception Internal_error of string
 
@@ -117,7 +117,7 @@ class virtual env (conf:Ssh_env_t.t) =
         let complist = bsl ["none"] in
         let langlist = bsl [] in
         let cookie = `Str (Cryptokit.Random.string conf.rng 16) in
-        Ssh_message.Transport.KexInit.t ~cookie:cookie
+        Message.Transport.KexInit.t ~cookie:cookie
             ~kex_algorithms:kexlist
             ~server_host_key_algorithms:hkeylist
             ~encryption_algorithms_client_to_server:cipherlist
@@ -173,26 +173,26 @@ class virtual env (conf:Ssh_env_t.t) =
         try
             match self#recv with
             |C.DHGexSHA1 x ->
-                Ssh_message.Dhgexsha1.prettyprint x;
+                Message.Dhgexsha1.prettyprint x;
                 self#dispatch_dhgexsha1_packet x
             |C.DHGroupSHA1 x ->
-                Ssh_message.Dhgroupsha1.prettyprint x;
+                Message.Dhgroupsha1.prettyprint x;
                 self#dispatch_dhg1sha1_packet x
             |C.Transport x ->
-                Ssh_message.Transport.prettyprint x;
+                Message.Transport.prettyprint x;
                 self#dispatch_transport_packet x
             |C.Auth x ->
-                Ssh_message.Auth.prettyprint x;
+                Message.Auth.prettyprint x;
                 self#dispatch_auth_packet x
             |C.Channel x ->
-                Ssh_message.Channel.prettyprint x;
+                Message.Channel.prettyprint x;
                 self#dispatch_channel_packet x
             |C.Unknown x ->
 				log#debug "Unknown packet, sending unimplemented";
 				self#dispatch_unimplemented_packet x
         with
             |Disconnect_connection (code,reason) ->
-                self#xmit (Ssh_message.Transport.Disconnect.t
+                self#xmit (Message.Transport.Disconnect.t
                     ~reason_code:code ~description:reason
                     ~language:"en_US" :> xmit_t);
                 connection_active <- false
@@ -200,14 +200,14 @@ class virtual env (conf:Ssh_env_t.t) =
                 connection_active <- false
 
     (* Virtual methods to handle the different packet types *)
-    method virtual dispatch_dhgexsha1_packet : Ssh_message.Dhgexsha1.o -> unit
-    method virtual dispatch_dhg1sha1_packet : Ssh_message.Dhgroupsha1.o -> unit
-    method virtual dispatch_transport_packet : Ssh_message.Transport.o -> unit
-    method virtual dispatch_auth_packet : Ssh_message.Auth.o -> unit
-    method virtual dispatch_channel_packet : Ssh_message.Channel.o -> unit
+    method virtual dispatch_dhgexsha1_packet : Message.Dhgexsha1.o -> unit
+    method virtual dispatch_dhg1sha1_packet : Message.Dhgroupsha1.o -> unit
+    method virtual dispatch_transport_packet : Message.Transport.o -> unit
+    method virtual dispatch_auth_packet : Message.Auth.o -> unit
+    method virtual dispatch_channel_packet : Message.Channel.o -> unit
 
     method dispatch_unimplemented_packet seq =
-        self#xmit (Ssh_message.Transport.Unimplemented.t ~seq_num:seq :> xmit_t)
+        self#xmit (Message.Transport.Unimplemented.t ~seq_num:seq :> xmit_t)
 
     (* Convenience functions for terminating a connection *)
     method disconnect ?(reason="") code =
@@ -286,7 +286,7 @@ class virtual env (conf:Ssh_env_t.t) =
             ~rfn:(fun ofd ->
                 if self#kexinit_finished then
                     self#send_packet_from_fd (fun chan -> chan#set_stdout None)
-                        (fun x -> self#xmit_channel chan (Ssh_message.Channel.Data.t
+                        (fun x -> self#xmit_channel chan (Message.Channel.Data.t
                         ~recipient_channel:chan#other_id ~data:x :> xmit_t))
                     chan ofd)
             ~efn:(fun ofd -> self#close_channel chan) fd in
@@ -298,7 +298,7 @@ class virtual env (conf:Ssh_env_t.t) =
             ~rfn:(fun ofd ->
                 if self#kexinit_finished then
                     self#send_packet_from_fd (fun chan -> chan#set_stdout None)
-                        (fun x -> self#xmit_channel chan (Ssh_message.Channel.ExtendedData.t
+                        (fun x -> self#xmit_channel chan (Message.Channel.ExtendedData.t
                         ~recipient_channel:chan#other_id ~data_type:`Stderr ~data:x :> xmit_t))
                     chan ofd)
             ~efn:(fun ofd -> self#close_channel chan) fd in

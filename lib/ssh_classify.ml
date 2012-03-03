@@ -16,7 +16,7 @@
  * $Id: ssh_classify.ml,v 1.5 2006/02/11 17:37:45 avsm Exp $
  *)
 
-open Ssh_message
+open Message
 
 exception Unknown_packet of int32 (* sequence number of unknown packet *)
 

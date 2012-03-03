@@ -32,7 +32,7 @@ module Server = struct
 
     type con_open_resp = 
       |Con_allow of (int32 * int32)
-      |Con_deny of Ssh_message.Channel.OpenFailure.reason_code_t
+      |Con_deny of Message.Channel.OpenFailure.reason_code_t
 end
 
 module Client = struct
@@ -64,7 +64,7 @@ class type server_config = object
     (* Callback to validate a username/password *)
     method auth_password : string -> string -> Server.auth_response
     (* Callback to validate a username/publickey *)
-    method auth_public_key : string -> Ssh_message.Key.o -> Server.auth_response
+    method auth_public_key : string -> Message.Key.o -> Server.auth_response
     (* Client requests new session (window size * packet size) *)
     method connection_request : int32 -> int32 -> Server.con_open_resp
     (* Inform the library of a new connection, and its id *)

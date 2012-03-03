@@ -94,7 +94,7 @@ class env conf server_conf = object(self)
         
     (* Decode and classify an SSH packet *)
     method decode_packet rx_seq_num env =
-        let module M = Ssh_message in
+        let module M = Message in
         let module MC = Ssh_classify in
         match MC.peek env with
         | MC.TransportGeneric
@@ -123,7 +123,7 @@ class env conf server_conf = object(self)
         let conn = self#derive_session_keys neg_state sess_hash shared_secret true in
         transport_state <- NewKeys conn
 
-    method dispatch_transport_packet (p:Ssh_message.Transport.o) =
+    method dispatch_transport_packet (p:Message.Transport.o) =
         match p with
         |`Ignore _ |`Debug _ -> ()
         |`KexInit client_ki -> begin
@@ -168,17 +168,17 @@ class env conf server_conf = object(self)
             (* received a newkeys, so transmit our own and switch to the new crypto *)
             let conn = match transport_state with
             |NewKeys x -> x |_ -> raise (self#protocol_error "newkeys") in
-            self#xmit (Ssh_message.Transport.NewKeys.t :> xmit_t);
+            self#xmit (Message.Transport.NewKeys.t :> xmit_t);
             self#set_transport conn;
             transport_state <- Encrypted
         |`ServiceReq (`UserAuth _) ->
-            self#xmit (Ssh_message.Transport.ServiceAccept.UserAuth.t :> xmit_t);
+            self#xmit (Message.Transport.ServiceAccept.UserAuth.t :> xmit_t);
             ()
         |`Disconnect _ |`ServiceAccept _
         |`ServiceReq _ |`Unimplemented _ ->
             raise (self#protocol_error "transport")
     
-    method dispatch_dhg1sha1_packet (p:Ssh_message.Dhgroupsha1.o) =
+    method dispatch_dhg1sha1_packet (p:Message.Dhgroupsha1.o) =
         match p with
         |`Init x ->
             let proto, neg_state = match transport_state with
@@ -188,10 +188,10 @@ class env conf server_conf = object(self)
             let p,g = Kex.Methods.public_parameters proto in
             let rsakey = server_conf#get_rsa_key in
             let mpint x = Mpl_stdlib.Mpl_mpint.of_string x in
-            let xmitkey = `RSA (Ssh_message.Key.RSA.t ~e:(mpint rsakey.Cryptokit.RSA.e)
+            let xmitkey = `RSA (Message.Key.RSA.t ~e:(mpint rsakey.Cryptokit.RSA.e)
                 ~n:(mpint rsakey.Cryptokit.RSA.n)) in
             let server_f, shared_secret = Kex.Methods.compute_reply self#rng p g x#e in
-            let k_s = Ssh_pool.get_string_fn (Ssh_message.Key.m xmitkey) in
+            let k_s = Ssh_pool.get_string_fn (Message.Key.m xmitkey) in
             let kex_hash_args = {
                 Kex.Methods.DHGroup.v_c=self#client_version;
                 v_s=self#server_version;
@@ -204,13 +204,13 @@ class env conf server_conf = object(self)
             let hash = Cryptokit.hash_string (Cryptokit.Hash.sha1 ()) kex_hash_concat in
             let signed_padded_hash = Cryptokit.RSA.sign rsakey
                 (Kex.Methods.pad_rsa_signature (mpint rsakey.Cryptokit.RSA.n) hash) in
-            let sig_h = Ssh_pool.get_string_fn (Ssh_message.Sig.RSA.t ~sig_blob:signed_padded_hash) in
-            let kex_reply = Ssh_message.Dhgroupsha1.Reply.t ~k_s:k_s ~f:server_f ~sig_h:sig_h in
+            let sig_h = Ssh_pool.get_string_fn (Message.Sig.RSA.t ~sig_blob:signed_padded_hash) in
+            let kex_reply = Message.Dhgroupsha1.Reply.t ~k_s:k_s ~f:server_f ~sig_h:sig_h in
             self#xmit (kex_reply :> xmit_t);
             self#set_new_keys neg_state hash shared_secret
         |`Reply _ -> raise (self#protocol_error "dhgexsha1 reply")
         
-    method dispatch_dhgexsha1_packet (p:Ssh_message.Dhgexsha1.o) =
+    method dispatch_dhgexsha1_packet (p:Message.Dhgexsha1.o) =
         match p with
         |`Request x -> begin
             let args = match transport_state with
@@ -223,7 +223,7 @@ class env conf server_conf = object(self)
             match Kex.Methods.DHGex.choose ~min:minv ~want:n ~max:maxv moduli with
             |None -> raise (self#disconnect `Kex_failed)
             |Some (p,g) ->
-                let reply = Ssh_message.Dhgexsha1.Group.t ~p:p ~g:g in
+                let reply = Message.Dhgexsha1.Group.t ~p:p ~g:g in
                 let gex_state = {p=p; g=g; min=minv; max=maxv; n=n} in
                 self#xmit (reply :> xmit_t);
                 transport_state <- Negotiation_DHGexSHA1_Init (args, gex_state)
@@ -235,10 +235,10 @@ class env conf server_conf = object(self)
             let p,g = gex_state.p, gex_state.g in
             let rsakey = server_conf#get_rsa_key in
             let mpint x = Mpl_stdlib.Mpl_mpint.of_string x in
-            let xmitkey = `RSA (Ssh_message.Key.RSA.t ~e:(mpint rsakey.Cryptokit.RSA.e)
+            let xmitkey = `RSA (Message.Key.RSA.t ~e:(mpint rsakey.Cryptokit.RSA.e)
                 ~n:(mpint rsakey.Cryptokit.RSA.n)) in
             let server_f, shared_secret = Kex.Methods.compute_reply self#rng p g x#e in
-            let k_s = Ssh_pool.get_string_fn (Ssh_message.Key.m xmitkey) in
+            let k_s = Ssh_pool.get_string_fn (Message.Key.m xmitkey) in
             let kex_hash_args = {
                 Kex.Methods.DHGex.v_c=self#client_version;
                 v_s=self#server_version; p=p; g=g;
@@ -251,14 +251,14 @@ class env conf server_conf = object(self)
             let hash = Cryptokit.hash_string (Cryptokit.Hash.sha1 ()) kex_hash_concat in
             let signed_padded_hash = Cryptokit.RSA.sign rsakey
                 (Kex.Methods.pad_rsa_signature (mpint rsakey.Cryptokit.RSA.n) hash) in
-            let sig_h = Ssh_pool.get_string_fn (Ssh_message.Sig.RSA.t ~sig_blob:signed_padded_hash) in
-            let kex_reply = Ssh_message.Dhgexsha1.Reply.t ~k_s:k_s ~f:server_f ~sig_h:sig_h in
+            let sig_h = Ssh_pool.get_string_fn (Message.Sig.RSA.t ~sig_blob:signed_padded_hash) in
+            let kex_reply = Message.Dhgexsha1.Reply.t ~k_s:k_s ~f:server_f ~sig_h:sig_h in
             self#xmit (kex_reply :> xmit_t);
             self#set_new_keys neg_state hash shared_secret
         |`Reply _ |`Group _ -> ()
 
-    method dispatch_auth_packet (p:Ssh_message.Auth.o) =
-      let module MA = Ssh_message.Auth in match p with
+    method dispatch_auth_packet (p:Message.Auth.o) =
+      let module MA = Message.Auth in match p with
       |`Req (`None x) ->
         (* Display auth banner if required *)
         umay (fun msg -> self#xmit (MA.Banner.t ~banner:msg ~language:"en_US" :> xmit_t))
@@ -278,7 +278,7 @@ class env conf server_conf = object(self)
         let alg = x#algorithm in
         match Keys.PublicKey.of_string alg with
         |Some Keys.PublicKey.RSAKey ->
-            self#xmit (Ssh_message.Auth.PublicKey_OK.t
+            self#xmit (Message.Auth.PublicKey_OK.t
                 ~algorithm:alg ~blob:x#blob :> xmit_t)
         |_ -> self#auth_response false
       end
@@ -312,11 +312,11 @@ class env conf server_conf = object(self)
         let auth_succeeded = s && (List.for_all 
             (fun x -> List.mem x succ_auths) lib_req_auths) in
         if auth_succeeded then begin
-            self#xmit (Ssh_message.Auth.Success.t :> xmit_t)
+            self#xmit (Message.Auth.Success.t :> xmit_t)
         end else begin
             if List.length notsucc_auths = 0 then
                 raise (self#disconnect `No_more_auth_methods_available);
-            self#xmit (Ssh_message.Auth.Failure.t
+            self#xmit (Message.Auth.Failure.t
                 ~auth_continue:(Ssh_userauth.to_string notsucc_auths)
                 ~partial_success:s :> xmit_t)
         end
@@ -352,16 +352,16 @@ class env conf server_conf = object(self)
         |(None,None,None,false) -> 
             chan#set_close true;
             chan#close_pty;
-            umay (fun s -> self#xmit (Ssh_message.Channel.Request.ExitStatus.t
+            umay (fun s -> self#xmit (Message.Channel.Request.ExitStatus.t
                 ~recipient_channel:chan#other_id
                 ~exit_status:(Int32.of_int s) :> xmit_t)) chan#exit_status;
-            self#xmit (Ssh_message.Channel.Close.t ~recipient_channel:chan#other_id :> xmit_t);
+            self#xmit (Message.Channel.Close.t ~recipient_channel:chan#other_id :> xmit_t);
             server_conf#connection_del chan;
             chans#del_chan chan#our_id
         |_ -> ()
 
-    method dispatch_channel_packet (p:Ssh_message.Channel.o) =
-      let module MC = Ssh_message.Channel in
+    method dispatch_channel_packet (p:Message.Channel.o) =
+      let module MC = Message.Channel in
       let channel_check x fn =
         match chans#find_by_id x#recipient_channel with
         |None -> () (* err so what happens ehere i wonder *)

@@ -1,4 +1,3 @@
-(*pp cpp *)
 (*
  * Copyright (c) 2004 David Scott <dave@recoil.org>
  * Copyright (c) 2004,2005,2006 Anil Madhavapeddy <anil@recoil.org>
@@ -61,7 +60,7 @@ module Packet = struct
         in
         let env = Ssh_pool.get () in
         M.set_fillfn env fillfn;
-        let p = Ssh_message.Ssh.unmarshal env in
+        let p = Message.Ssh.unmarshal env in
         (* calculate the MAC we are expecting *)
         let expecting = M.env_fn p#env macfn in 
         let mac_len = String.length expecting in
@@ -103,7 +102,7 @@ module Packet = struct
             M.Mpl_raw.marshal env pad
         in
         (* marshal the payload and padding into place *)
-        let p = Ssh_message.Ssh.t ~data:(`Sub d) ~padding:(`Sub padding) txenv in
+        let p = Message.Ssh.t ~data:(`Sub d) ~padding:(`Sub padding) txenv in
         (* compute mac *)
         let mac = M.env_fn p#env macfn in
         (* encrypt packet *)
