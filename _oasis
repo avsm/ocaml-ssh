@@ -1,0 +1,15 @@
+OASISFormat: 0.2
+Name:        ssh
+Version:     0.9-dev
+Synopsis:    SSH protocol and client/server in pure OCaml
+Authors:     Anil Madhavapeddy
+License:     ISC
+Plugins:     META (0.2)
+BuildTools:  ocamlbuild
+
+Library ssh
+  Path:      lib
+  Findlibname: ssh
+  Modules: Ssh_tty,Ssh_channel,Ssh_kex
+  BuildDepends:	lwt.syntax, lwt, cryptokit
+
