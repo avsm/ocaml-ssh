@@ -21,6 +21,8 @@ exception Key_too_short
 
 module Methods : sig
 
+  type mpint = Mpl_stdlib.Mpl_mpint.t
+
   type t =
   | DiffieHellmanGexSHA1
   | DiffieHellmanGroup1SHA1
@@ -33,9 +35,9 @@ module Methods : sig
       i_c : string;
       i_s : string;
       k_s : string;
-      e : Mpl_stdlib.Mpl_mpint.t;
-      f : Mpl_stdlib.Mpl_mpint.t;
-      k : Mpl_stdlib.Mpl_mpint.t;
+      e : mpint;
+      f : mpint;
+      k : mpint;
     }
     val marshal : kex_hash -> string
   end
@@ -50,26 +52,26 @@ module Methods : sig
       min : int32;
       n : int32;
       max : int32;
-      p : Mpl_stdlib.Mpl_mpint.t;
-      g : Mpl_stdlib.Mpl_mpint.t;
-      e : Mpl_stdlib.Mpl_mpint.t;
-      f : Mpl_stdlib.Mpl_mpint.t;
-      k : Mpl_stdlib.Mpl_mpint.t;
+      p : mpint;
+      g : mpint;
+      e : mpint;
+      f : mpint;
+      k : mpint;
     }
     val marshal : kex_hash -> string
     type moduli
     val empty_moduli : unit -> moduli
-    val add_moduli : primes:moduli -> size:int32 -> prime:Mpl_stdlib.Mpl_mpint.t ->
-      generator:Mpl_stdlib.Mpl_mpint.t -> unit
+    val add_moduli : primes:moduli -> size:int32 -> prime:mpint ->
+      generator:mpint -> unit
     val choose : min:int32 -> want:int32 -> max:int32 -> moduli ->
-      (Mpl_stdlib.Mpl_mpint.t * Mpl_stdlib.Mpl_mpint.t) option
+      (mpint * mpint) option
   end
 
   exception Unknown of string
   val to_string : t -> string
   val from_string : string -> t
 
-  val public_parameters : t -> Mpl_stdlib.Mpl_mpint.t * Mpl_stdlib.Mpl_mpint.t
+  val public_parameters : t -> mpint * mpint
 
   val algorithm_choice :
       kex:string * string ->
@@ -80,16 +82,16 @@ module Methods : sig
       (string -> exn) ->
       t * Algorithms.Cipher.t * Algorithms.Cipher.t * Algorithms.MAC.t *
       Algorithms.MAC.t
-    val cryptokit_params : Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t -> Cryptokit.DH.parameters
+    val cryptokit_params : mpint -> mpint -> Cryptokit.DH.parameters
     val compute_init :
       Cryptokit.Random.rng ->
-      Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t * Cryptokit.DH.private_secret
+      mpint -> mpint -> mpint * Cryptokit.DH.private_secret
     val compute_shared_secret :
-      Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t -> Cryptokit.DH.private_secret -> Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t
+      mpint -> mpint -> Cryptokit.DH.private_secret -> mpint -> mpint
     val compute_reply :
-      Cryptokit.Random.rng -> Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t -> Mpl_stdlib.Mpl_mpint.t * Mpl_stdlib.Mpl_mpint.t
-    val pad_rsa_signature : Mpl_stdlib.Mpl_mpint.t -> string -> string
+      Cryptokit.Random.rng -> mpint -> mpint -> mpint -> mpint * mpint
+    val pad_rsa_signature : mpint -> string -> string
     val derive_key :
-      (unit -> Cryptokit.hash) -> Mpl_stdlib.Mpl_mpint.t -> string -> string -> int -> char -> string
+      (unit -> Cryptokit.hash) -> mpint -> string -> string -> int -> char -> string
     val verify_rsa_signature : Message.Key.RSA.o -> string -> string -> bool
   end

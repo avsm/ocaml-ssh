@@ -30,7 +30,9 @@ module Methods = struct
   module BS = M.Mpl_string32
   module I32 = M.Mpl_uint32
   module MR = M.Mpl_raw
-  
+ 
+  type mpint = Mpl_stdlib.Mpl_mpint.t
+ 
   type t = 
   | DiffieHellmanGexSHA1
   | DiffieHellmanGroup1SHA1
