@@ -1,0 +1,9 @@
+# OASIS_START
+# DO NOT EDIT (digest: 430571212005cddedf4d34fa379df770)
+version = "0.9-dev"
+description = "SSH protocol and client/server in pure OCaml"
+archive(byte) = "ounix.cma"
+archive(native) = "ounix.cmxa"
+exists_if = "ounix.cma"
+# OASIS_STOP
+
