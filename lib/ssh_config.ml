@@ -41,7 +41,7 @@ module Client = struct
 end
     
 class type client_config = object
-    method verify_hostkey: Ssh_keys.PublicKey.t -> bool
+    method verify_hostkey: Keys.PublicKey.t -> bool
     method auth_choose: Ssh_userauth.t list -> Ssh_userauth.t option
     method auth_banner: string -> unit
     method auth_username: string

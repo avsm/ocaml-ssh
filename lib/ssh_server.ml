@@ -276,8 +276,8 @@ class env conf server_conf = object(self)
         end
       |`Req (`PublicKey (`Check x)) -> begin
         let alg = x#algorithm in
-        match Ssh_keys.PublicKey.of_string alg with
-        |Some Ssh_keys.PublicKey.RSAKey ->
+        match Keys.PublicKey.of_string alg with
+        |Some Keys.PublicKey.RSAKey ->
             self#xmit (Ssh_message.Auth.PublicKey_OK.t
                 ~algorithm:alg ~blob:x#blob :> xmit_t)
         |_ -> self#auth_response false
