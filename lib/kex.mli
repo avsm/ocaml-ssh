@@ -59,12 +59,11 @@ module Methods : sig
       k : mpint;
     }
     val marshal : kex_hash -> string
+
     type moduli
     val empty_moduli : unit -> moduli
-    val add_moduli : primes:moduli -> size:int32 -> prime:mpint ->
-      generator:mpint -> unit
-    val choose : min:int32 -> want:int32 -> max:int32 -> moduli ->
-      (mpint * mpint) option
+    val add_moduli : primes:moduli -> size:int32 -> prime:mpint -> generator:mpint -> unit
+    val choose : min:int32 -> want:int32 -> max:int32 -> moduli -> (mpint * mpint) option
   end
 
   exception Unknown of string
@@ -73,25 +72,19 @@ module Methods : sig
 
   val public_parameters : t -> mpint * mpint
 
-  val algorithm_choice :
-      kex:string * string ->
-      enc_cs:string * string ->
-      enc_sc:string * string ->
-      mac_cs:string * string ->
-      mac_sc:string * string ->
-      (string -> exn) ->
-      t * Algorithms.Cipher.t * Algorithms.Cipher.t * Algorithms.MAC.t *
-      Algorithms.MAC.t
-    val cryptokit_params : mpint -> mpint -> Cryptokit.DH.parameters
-    val compute_init :
-      Cryptokit.Random.rng ->
-      mpint -> mpint -> mpint * Cryptokit.DH.private_secret
-    val compute_shared_secret :
-      mpint -> mpint -> Cryptokit.DH.private_secret -> mpint -> mpint
-    val compute_reply :
-      Cryptokit.Random.rng -> mpint -> mpint -> mpint -> mpint * mpint
-    val pad_rsa_signature : mpint -> string -> string
-    val derive_key :
-      (unit -> Cryptokit.hash) -> mpint -> string -> string -> int -> char -> string
-    val verify_rsa_signature : Message.Key.RSA.o -> string -> string -> bool
-  end
+  val algorithm_choice : kex:string * string -> enc_cs:string * string -> 
+    enc_sc:string * string ->
+    mac_cs:string * string ->
+    mac_sc:string * string -> (string -> exn) -> 
+    t * Algorithms.Cipher.t * Algorithms.Cipher.t * Algorithms.MAC.t * Algorithms.MAC.t
+
+  val compute_init : Cryptokit.Random.rng -> mpint -> mpint -> 
+    mpint * Cryptokit.DH.private_secret
+
+  val compute_shared_secret : mpint -> mpint -> Cryptokit.DH.private_secret -> mpint -> mpint
+
+  val compute_reply : Cryptokit.Random.rng -> mpint -> mpint -> mpint -> mpint * mpint
+  val pad_rsa_signature : mpint -> string -> string
+
+  val derive_key : (unit -> Cryptokit.hash) -> mpint -> string -> string -> int -> char -> string
+end
