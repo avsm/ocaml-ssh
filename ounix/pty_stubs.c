@@ -21,6 +21,10 @@
 #include <string.h>
 #include <termios.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
+
+#undef HAVE_PTY_H
+#define HAVE_UTIL_H
 
 #ifdef HAVE_PTY_H
 #  include <pty.h>
