@@ -37,7 +37,7 @@ end
 
 module Client = struct
     type chanfn = Unix.file_descr -> int32 -> int32 ->
-        Ssh_channel.pty_req option -> string option -> int32 option
+        Channel.pty_req option -> string option -> int32 option
 end
     
 class type client_config = object
@@ -68,17 +68,17 @@ class type server_config = object
     (* Client requests new session (window size * packet size) *)
     method connection_request : int32 -> int32 -> Server.con_open_resp
     (* Inform the library of a new connection, and its id *)
-    method connection_add : Ssh_channel.channel -> unit
+    method connection_add : Channel.channel -> unit
     (* Notify the library that the object is no longer valid *)
-    method connection_del : Ssh_channel.channel -> unit
+    method connection_del : Channel.channel -> unit
     (* Request a pty: id -> modes -> (row,col,xpix,ypix) -> (pty,pty_window) *)
-    method connection_add_pty : Ssh_channel.channel -> string ->
+    method connection_add_pty : Channel.channel -> string ->
         (int32 * int32 * int32 * int32) ->
         (Ounix.Pty.pty * Ounix.Pty.pty_window) option
     (* Request a command exec: id -> cmd -> exec_response *)
-    method connection_request_exec : Ssh_channel.channel -> string -> Server.exec_response
+    method connection_request_exec : Channel.channel -> string -> Server.exec_response
     (* Request a shell : id -> exec_response *)
-    method connection_request_shell : Ssh_channel.channel ->
+    method connection_request_shell : Channel.channel ->
         (Ounix.Pty.pty * Ounix.Pty.pty_window) option -> Server.exec_response
 
 end

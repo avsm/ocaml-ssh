@@ -13,7 +13,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * $Id: ssh_channel.ml,v 1.18 2006/03/16 12:23:01 avsm Exp $
  *)
 
 open Ssh_utils
@@ -31,21 +30,6 @@ class channel
     val mutable interactive = false
     val mutable pty = None
 
-    val mutable automaton =
-        let auto = Ssh_server_channel.init () in
-        if conf.Ssh_env_t.debugger then begin
-            let sock_factory = Spl_stdlib.get_tcp_sock_factory 1235 in
-            let oc,_ = sock_factory () in
-            Ssh_server_channel.pagefn oc;
-            Ssh_server_channel.set_cfn auto sock_factory;
-        end;
-        auto
-   
-    method automaton = automaton
-    method tick_automaton (s:Ssh_statecalls.t) =
-        (* automaton <- Ssh_server_channel.tick automaton s *)
-        ()
-    
     val our_channel = channel
     val our_packet_size = packet_size
     val our_initial_window = initial_window

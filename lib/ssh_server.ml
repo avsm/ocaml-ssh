@@ -13,7 +13,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * $Id: ssh_server.ml,v 1.25 2006/03/17 02:55:43 avsm Exp $
  *)
 
 open Printf
@@ -54,14 +53,6 @@ class env conf server_conf = object(self)
     (* A username we have authenticated with *)
     val mutable auth_username = (None:string option)
 
-    (* SPL automaton *)
-    val mutable automaton = Ssh_server_automaton.init ()
-    method automaton = automaton
-    
-    method tick_automaton (x : Ssh_statecalls.t) =
-        (* automaton <- Ssh_server_automaton.tick automaton x *)
-         ()
-
     (* Transmit a kexinit, but also return the transmitted packet.
        This is done by wrapping the packet evaluator in a closure which
        records it into a reference when the packet is transmitted.
@@ -84,13 +75,7 @@ class env conf server_conf = object(self)
 
     initializer
         let kx = self#xmit_kexinit in
-        transport_state <- KexInit kx;
-        if conf.Ssh_env_t.debugger then begin
-            let sock_factory = Spl_stdlib.get_tcp_sock_factory 1234 in
-            let oc,_ = sock_factory () in
-            Ssh_server_automaton.pagefn oc;
-            Ssh_server_automaton.set_cfn automaton sock_factory;
-        end
+        transport_state <- KexInit kx
         
     (* Decode and classify an SSH packet *)
     method decode_packet rx_seq_num env =
@@ -133,8 +118,8 @@ class env conf server_conf = object(self)
             |_ -> raise (Ssh_env.Internal_error "kexinit in unexpected state") in
             let bsl = String.concat "," in
             let kexlist = bsl (List.map Kex.Methods.to_string conf.Ssh_env_t.kex_methods) in
-            let maclist = bsl (List.map Ssh_algorithms.MAC.to_string conf.Ssh_env_t.mac_methods) in
-            let cipherlist = bsl (List.map Ssh_algorithms.Cipher.to_string conf.Ssh_env_t.cipher_methods) in
+            let maclist = bsl (List.map Algorithms.MAC.to_string conf.Ssh_env_t.mac_methods) in
+            let cipherlist = bsl (List.map Algorithms.Cipher.to_string conf.Ssh_env_t.cipher_methods) in
             let s_kex, s_enc_cs, s_enc_sc, s_mac_cs, s_mac_sc =
                 Kex.Methods.algorithm_choice
                     ~kex: (kexlist, client_ki#kex_algorithms)
@@ -152,16 +137,10 @@ class env conf server_conf = object(self)
             } in
             match s_kex with
             |Kex.Methods.DiffieHellmanGroup1SHA1 ->
-                log#debug "Kexinit: Expect DHInit";
-                self#tick_automaton `Expect_DHInit;
                 transport_state <- Negotiation_DHG1SHA1 next_args
             |Kex.Methods.DiffieHellmanGroup14SHA1 ->
-                log#debug "Kexinit: Expect DHInit Gex14";
-                self#tick_automaton `Expect_DHInit;
                 transport_state <- Negotiation_DHG14SHA1 next_args
             |Kex.Methods.DiffieHellmanGexSHA1 ->
-                log#debug "Kexinit: Expect GexSHA1";
-                self#tick_automaton `Expect_GexInit;
                 transport_state <- Negotiation_DHGexSHA1_Request next_args
         end
         |`NewKeys _ ->
@@ -345,7 +324,7 @@ class env conf server_conf = object(self)
     (* Attempt to close the channel.  If it still has a PID or stdout/stderr open, then
        do not actually send a close yet; this function is meant to be called multiple
        times from the various callbacks *)
-    method close_channel (chan:Ssh_channel.channel) =
+    method close_channel (chan:Channel.channel) =
         (* First send a kill to encourage a sigchld to show up later *)
         umay (fun x -> try Unix.kill x Sys.sigterm with _ -> ()) chan#pid;
         match chan#pid, chan#stdout, chan#stderr, chan#close with
@@ -365,19 +344,12 @@ class env conf server_conf = object(self)
       let channel_check x fn =
         match chans#find_by_id x#recipient_channel with
         |None -> () (* err so what happens ehere i wonder *)
-        |Some chan ->
-            (* try to tick the channel *)
-            let sc = (MC.recv_statecall p :> Ssh_statecalls.t) in
-            chan#tick_automaton sc;
-            fn (self#xmit_channel chan) chan;
+        |Some chan -> fn (self#xmit_channel chan) chan;
         in
       let channel_check_reply x fn =
         match chans#find_by_id x#recipient_channel with
         |None -> () (* err so what happens ehere i wonder *)
         |Some chan ->
-            (* try to tick the channel *)
-            let sc = (MC.recv_statecall p :> Ssh_statecalls.t) in
-            chan#tick_automaton sc;
             let res = fn (self#xmit_channel chan) chan in
             if x#want_reply then begin
                 if res then
@@ -417,7 +389,6 @@ class env conf server_conf = object(self)
             let dims = (x#width_chars, x#height_rows, x#width_pixels, x#height_pixels) in  
             match server_conf#connection_add_pty chan x#term dims with
             |Some (pty, pwin) ->
-                chan#tick_automaton `Expect_Pty_Success;
                 chan#set_pty (pty,pwin);
                 conf.Ssh_env_t.fd#set_nodelay true;
                 true
@@ -427,7 +398,6 @@ class env conf server_conf = object(self)
         channel_check_reply x (fun xmitfn chan ->
             match server_conf#connection_request_exec chan x#command with
             |Some (pid, stdin, stdout, stderr) ->
-                chan#tick_automaton `Expect_Exec_Success;
                 let ostdin = may (fun stdin -> new Ounix.stream_odescr stdin) stdin in
                 let ostdout = may (self#ofd_of_stdout conf.Ssh_env_t.osel chan) stdout in
                 let ostderr = may (self#ofd_of_stderr conf.Ssh_env_t.osel chan) stderr in
@@ -442,7 +412,6 @@ class env conf server_conf = object(self)
         channel_check_reply x (fun xmitfn chan ->
             match server_conf#connection_request_shell chan chan#pty with
             |Some (pid, stdin, stdout, stderr) ->
-                chan#tick_automaton `Expect_Shell_Success;
                 let ostdin = may (fun stdin -> new Ounix.stream_odescr stdin) stdin in
                 let ostdout = may (fun stdout -> self#ofd_of_stdout conf.Ssh_env_t.osel chan stdout) stdout in
                 let ostderr = may (self#ofd_of_stderr conf.Ssh_env_t.osel chan) stderr in

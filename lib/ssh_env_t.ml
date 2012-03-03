@@ -1,5 +1,5 @@
 type t = {
-    fd: Unix.fd;
+    fd: Ounix.tcp_odescr;
     log: Olog.base_log;
     rng: Cryptokit.Random.rng;
     osel: Ounix.oselect;

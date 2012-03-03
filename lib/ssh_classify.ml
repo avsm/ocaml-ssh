@@ -39,22 +39,6 @@ type c =
     | Reserved
     | LocalExtensions
 
-let global_recv (x:Channel.o) = match x with
-    |`GlobalRequest x -> Some (Channel.GlobalRequest.recv_statecall x)
-    |`RequestSuccess x -> Some Channel.RequestSuccess.recv_statecall
-    |`RequestSuccessPort x -> Some Channel.RequestSuccessPort.recv_statecall
-    |`RequestFailure x -> Some Channel.RequestFailure.recv_statecall
-    |`Open x -> Some (Channel.Open.recv_statecall x)
-    |_ -> None
-
-let recv_statecall x = match x with
-    | Transport x -> Some (Transport.recv_statecall x :> Ssh_statecalls.t)
-    | Auth x -> Some (Auth.recv_statecall x :> Ssh_statecalls.t)
-    | DHGroupSHA1 x -> Some (Dhgroupsha1.recv_statecall x :> Ssh_statecalls.t)
-    | DHGexSHA1 x -> Some (Dhgexsha1.recv_statecall x :> Ssh_statecalls.t)
-    | Channel x -> global_recv x
-    | Unknown _ -> None
-
 let prettyprint x = match x with
     | Transport x -> Transport.prettyprint x
     | Auth x ->  Auth.prettyprint x

@@ -1,8 +1,8 @@
 # OASIS_START
-# DO NOT EDIT (digest: bd6c7fa3067403a277cb40142bc316b6)
+# DO NOT EDIT (digest: 82ca0b9630891f90c3f0672110b6cbbd)
 version = "0.9-dev"
 description = "SSH protocol and client/server in pure OCaml"
-requires = "lwt.syntax lwt cryptokit"
+requires = "lwt.syntax lwt cryptokit ounix"
 archive(byte) = "ssh.cma"
 archive(native) = "ssh.cmxa"
 exists_if = "ssh.cma"

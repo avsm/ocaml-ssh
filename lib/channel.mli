@@ -5,7 +5,6 @@ class channel :
   channel:int32 ->
   Ssh_env_t.t ->
   object
-    val mutable automaton : Ssh_server_channel.t
     val mutable close : bool
     val mutable exit_status : int option
     val mutable interactive : bool
@@ -22,7 +21,6 @@ class channel :
     val mutable stderr : Ounix.stream_odescr option
     val mutable stdin : Ounix.stream_odescr option
     val mutable stdout : Ounix.stream_odescr option
-    method automaton : Ssh_server_channel.t
     method clear_pid : unit
     method close : bool
     method close_pty : unit
@@ -54,7 +52,6 @@ class channel :
     method stderr : Ounix.stream_odescr option
     method stdin : Ounix.stream_odescr option
     method stdout : Ounix.stream_odescr option
-    method tick_automaton : Ssh_statecalls.t -> unit
   end
 type pty_req = {
   term : string;

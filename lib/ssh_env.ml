@@ -67,7 +67,7 @@ class virtual env (conf:Ssh_env_t.t) =
     method connection_active = connection_active
 
     (* Multiplexed channels *)
-    val chans = new Ssh_channel.channel_env
+    val chans = new Channel.channel_env
     method chans = chans
 
     (* Return an odescr to drive this object with network traffic *)
@@ -130,8 +130,6 @@ class virtual env (conf:Ssh_env_t.t) =
             ~languages_server_to_client:langlist
             ~kex_packet_follows:false
 
-    method virtual tick_automaton : Ssh_statecalls.t -> unit
-    
     (* Receive and classify an SSH packet *)
     method private recv =
         let module TP = Ssh_transport.Packet in
@@ -141,12 +139,7 @@ class virtual env (conf:Ssh_env_t.t) =
             ~decryptfn:transport.decryptfn
             ~macfn:transport.decrypt_macfn
             conf.fd in
-        let decoded = self#decode_packet !rx_seq_num penv in
-        let _ = match Ssh_classify.recv_statecall decoded with
-        |None -> ()
-            (* route incoming statecall to correct channel *)
-        |Some sc -> self#tick_automaton sc in 
-        decoded
+        self#decode_packet !rx_seq_num penv
         
     (* Transmit an SSH packet *)
     method private xmit (pack:Mpl_stdlib.env -> xmit) =
@@ -156,16 +149,14 @@ class virtual env (conf:Ssh_env_t.t) =
             ~padfn:(Cryptokit.Random.string conf.rng)
             ~cryptfn:transport.cryptfn
             ~macfn:transport.crypt_macfn
-            ~splfn:(fun o -> self#tick_automaton o#xmit_statecall)
             conf pack
     
-    method private xmit_channel (chan:Ssh_channel.channel) (pack:Mpl_stdlib.env -> xmit) =
+    method private xmit_channel (chan:Channel.channel) (pack:Mpl_stdlib.env -> xmit) =
         tx_seq_num := Int32.succ !tx_seq_num;
         Ssh_transport.Packet.marshal ~block_size:transport.encrypt_block_size
             ~padfn:(Cryptokit.Random.string conf.rng)
             ~cryptfn:transport.cryptfn
             ~macfn:transport.crypt_macfn
-            ~splfn:(fun o -> chan#tick_automaton o#xmit_statecall)
             conf pack
 
     method private read_ssh_packet =
@@ -279,7 +270,7 @@ class virtual env (conf:Ssh_env_t.t) =
 
     method virtual kexinit_finished : bool
     (* Channel handling *)
-    method virtual close_channel : Ssh_channel.channel -> unit
+    method virtual close_channel : Channel.channel -> unit
 
     method ofd_of_stdout (osel:Ounix.oselect) chan fd =
         let od = new Ounix.stream_odescr
@@ -305,7 +296,7 @@ class virtual env (conf:Ssh_env_t.t) =
         osel#add_ofd (od :> Ounix.odescr);
         od
         
-    method send_packet_from_fd setfn tfn (chan:Ssh_channel.channel) (ofd:Ounix.stream_odescr) =
+    method send_packet_from_fd setfn tfn (chan:Channel.channel) (ofd:Ounix.stream_odescr) =
         let module M = Mpl_stdlib in
         let chan_err () =
             setfn chan;

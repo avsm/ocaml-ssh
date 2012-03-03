@@ -79,20 +79,15 @@ module Packet = struct
     class type xmit = object
         method env : Mpl_stdlib.env
         method prettyprint : unit
-        method xmit_statecall : Ssh_statecalls.t
     end
     type xmit_t = Mpl_stdlib.env -> xmit
 
-    let marshal ~block_size ~padfn ~cryptfn ~macfn ~splfn (conf:Ssh_env_t.t) (data:xmit_t) =
+    let marshal ~block_size ~padfn ~cryptfn ~macfn (conf:Ssh_env_t.t) (data:xmit_t) =
         let fd = conf.Ssh_env_t.fd in
         let module M = Mpl_stdlib in
         let txenv = Ssh_pool.get () in
         (* XXX compression not supported yet *)
-        let d env =
-            let pack = data env in
-            splfn pack
-        in
-            
+        let d env = let pack = data env in () in
         (* calculate padding *)
         let padding env =
             let align = max block_size 8 in
