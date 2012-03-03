@@ -53,7 +53,7 @@ end
 
 class type server_config = object
     (* Initialize moduli for Gex key exchange *)
-    method moduli_init : Ssh_kex.Methods.DHGex.moduli
+    method moduli_init : Kex.Methods.DHGex.moduli
     (* Servers RSA key, both private and public components required *)
     method get_rsa_key : Cryptokit.RSA.key
     (* An optional banner to display at start of authentication

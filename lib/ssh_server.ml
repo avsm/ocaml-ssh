@@ -132,11 +132,11 @@ class env conf server_conf = object(self)
             |Encrypted -> self#xmit_kexinit (* rekey request *)
             |_ -> raise (Ssh_env.Internal_error "kexinit in unexpected state") in
             let bsl = String.concat "," in
-            let kexlist = bsl (List.map Ssh_kex.Methods.to_string conf.Ssh_env_t.kex_methods) in
+            let kexlist = bsl (List.map Kex.Methods.to_string conf.Ssh_env_t.kex_methods) in
             let maclist = bsl (List.map Ssh_algorithms.MAC.to_string conf.Ssh_env_t.mac_methods) in
             let cipherlist = bsl (List.map Ssh_algorithms.Cipher.to_string conf.Ssh_env_t.cipher_methods) in
             let s_kex, s_enc_cs, s_enc_sc, s_mac_cs, s_mac_sc =
-                Ssh_kex.Methods.algorithm_choice
+                Kex.Methods.algorithm_choice
                     ~kex: (kexlist, client_ki#kex_algorithms)
                     ~enc_cs: (cipherlist, client_ki#encryption_algorithms_client_to_server)
                     ~enc_sc: (cipherlist, client_ki#encryption_algorithms_server_to_client)
@@ -151,15 +151,15 @@ class env conf server_conf = object(self)
                 mac_cs=s_mac_cs; mac_sc=s_mac_sc;
             } in
             match s_kex with
-            |Ssh_kex.Methods.DiffieHellmanGroup1SHA1 ->
+            |Kex.Methods.DiffieHellmanGroup1SHA1 ->
                 log#debug "Kexinit: Expect DHInit";
                 self#tick_automaton `Expect_DHInit;
                 transport_state <- Negotiation_DHG1SHA1 next_args
-            |Ssh_kex.Methods.DiffieHellmanGroup14SHA1 ->
+            |Kex.Methods.DiffieHellmanGroup14SHA1 ->
                 log#debug "Kexinit: Expect DHInit Gex14";
                 self#tick_automaton `Expect_DHInit;
                 transport_state <- Negotiation_DHG14SHA1 next_args
-            |Ssh_kex.Methods.DiffieHellmanGexSHA1 ->
+            |Kex.Methods.DiffieHellmanGexSHA1 ->
                 log#debug "Kexinit: Expect GexSHA1";
                 self#tick_automaton `Expect_GexInit;
                 transport_state <- Negotiation_DHGexSHA1_Request next_args
@@ -182,28 +182,28 @@ class env conf server_conf = object(self)
         match p with
         |`Init x ->
             let proto, neg_state = match transport_state with
-            |Negotiation_DHG1SHA1 a -> Ssh_kex.Methods.DiffieHellmanGroup1SHA1, a
-            |Negotiation_DHG14SHA1 a -> Ssh_kex.Methods.DiffieHellmanGroup14SHA1, a
+            |Negotiation_DHG1SHA1 a -> Kex.Methods.DiffieHellmanGroup1SHA1, a
+            |Negotiation_DHG14SHA1 a -> Kex.Methods.DiffieHellmanGroup14SHA1, a
             |_ -> raise (self#protocol_error "dhg1sha1") in
-            let p,g = Ssh_kex.Methods.public_parameters proto in
+            let p,g = Kex.Methods.public_parameters proto in
             let rsakey = server_conf#get_rsa_key in
             let mpint x = Mpl_stdlib.Mpl_mpint.of_string x in
             let xmitkey = `RSA (Ssh_message.Key.RSA.t ~e:(mpint rsakey.Cryptokit.RSA.e)
                 ~n:(mpint rsakey.Cryptokit.RSA.n)) in
-            let server_f, shared_secret = Ssh_kex.Methods.compute_reply self#rng p g x#e in
+            let server_f, shared_secret = Kex.Methods.compute_reply self#rng p g x#e in
             let k_s = Ssh_pool.get_string_fn (Ssh_message.Key.m xmitkey) in
             let kex_hash_args = {
-                Ssh_kex.Methods.DHGroup.v_c=self#client_version;
+                Kex.Methods.DHGroup.v_c=self#client_version;
                 v_s=self#server_version;
                 i_c=neg_state.Ssh_env.client_kexinit;
                 i_s=neg_state.Ssh_env.server_kexinit;
                 k_s=k_s;
                 e=x#e; f=server_f; k=shared_secret;
             } in
-            let kex_hash_concat = Ssh_kex.Methods.DHGroup.marshal kex_hash_args in
+            let kex_hash_concat = Kex.Methods.DHGroup.marshal kex_hash_args in
             let hash = Cryptokit.hash_string (Cryptokit.Hash.sha1 ()) kex_hash_concat in
             let signed_padded_hash = Cryptokit.RSA.sign rsakey
-                (Ssh_kex.Methods.pad_rsa_signature (mpint rsakey.Cryptokit.RSA.n) hash) in
+                (Kex.Methods.pad_rsa_signature (mpint rsakey.Cryptokit.RSA.n) hash) in
             let sig_h = Ssh_pool.get_string_fn (Ssh_message.Sig.RSA.t ~sig_blob:signed_padded_hash) in
             let kex_reply = Ssh_message.Dhgroupsha1.Reply.t ~k_s:k_s ~f:server_f ~sig_h:sig_h in
             self#xmit (kex_reply :> xmit_t);
@@ -220,7 +220,7 @@ class env conf server_conf = object(self)
             let maxv = x#maxv in
             let n = x#n in
             let moduli = server_conf#moduli_init in
-            match Ssh_kex.Methods.DHGex.choose ~min:minv ~want:n ~max:maxv moduli with
+            match Kex.Methods.DHGex.choose ~min:minv ~want:n ~max:maxv moduli with
             |None -> raise (self#disconnect `Kex_failed)
             |Some (p,g) ->
                 let reply = Ssh_message.Dhgexsha1.Group.t ~p:p ~g:g in
@@ -237,20 +237,20 @@ class env conf server_conf = object(self)
             let mpint x = Mpl_stdlib.Mpl_mpint.of_string x in
             let xmitkey = `RSA (Ssh_message.Key.RSA.t ~e:(mpint rsakey.Cryptokit.RSA.e)
                 ~n:(mpint rsakey.Cryptokit.RSA.n)) in
-            let server_f, shared_secret = Ssh_kex.Methods.compute_reply self#rng p g x#e in
+            let server_f, shared_secret = Kex.Methods.compute_reply self#rng p g x#e in
             let k_s = Ssh_pool.get_string_fn (Ssh_message.Key.m xmitkey) in
             let kex_hash_args = {
-                Ssh_kex.Methods.DHGex.v_c=self#client_version;
+                Kex.Methods.DHGex.v_c=self#client_version;
                 v_s=self#server_version; p=p; g=g;
                 i_c=neg_state.Ssh_env.client_kexinit;
                 i_s=neg_state.Ssh_env.server_kexinit;
                 k_s=k_s; e=x#e; f=server_f; k=shared_secret;
                 min=gex_state.min; max=gex_state.max; n=gex_state.n;
             } in
-            let kex_hash_concat = Ssh_kex.Methods.DHGex.marshal kex_hash_args in
+            let kex_hash_concat = Kex.Methods.DHGex.marshal kex_hash_args in
             let hash = Cryptokit.hash_string (Cryptokit.Hash.sha1 ()) kex_hash_concat in
             let signed_padded_hash = Cryptokit.RSA.sign rsakey
-                (Ssh_kex.Methods.pad_rsa_signature (mpint rsakey.Cryptokit.RSA.n) hash) in
+                (Kex.Methods.pad_rsa_signature (mpint rsakey.Cryptokit.RSA.n) hash) in
             let sig_h = Ssh_pool.get_string_fn (Ssh_message.Sig.RSA.t ~sig_blob:signed_padded_hash) in
             let kex_reply = Ssh_message.Dhgexsha1.Reply.t ~k_s:k_s ~f:server_f ~sig_h:sig_h in
             self#xmit (kex_reply :> xmit_t);

@@ -110,7 +110,7 @@ class virtual env (conf:Ssh_env_t.t) =
     (* Constructs a closure for the KexInit packet depending on configuration *)
     method private kexinit =
         let bsl = String.concat "," in
-        let kexlist = bsl (List.map Ssh_kex.Methods.to_string conf.kex_methods) in
+        let kexlist = bsl (List.map Kex.Methods.to_string conf.kex_methods) in
         let maclist = bsl (List.map Algorithms.MAC.to_string conf.mac_methods) in
         let cipherlist = bsl (List.map Algorithms.Cipher.to_string conf.cipher_methods) in
         let hkeylist = bsl (List.map Ssh_keys.PublicKey.to_string conf.hostkey_algorithms) in
@@ -222,7 +222,7 @@ class virtual env (conf:Ssh_env_t.t) =
         let session_id = match session_id with
             |None -> session_id <- Some sess_hash; sess_hash
             |Some x -> x in
-        let derivefn bs x = Ssh_kex.Methods.derive_key (Cryptokit.Hash.sha1)
+        let derivefn bs x = Kex.Methods.derive_key (Cryptokit.Hash.sha1)
             shared_secret sess_hash session_id bs x in
         let cipher_cs = Algorithms.Cipher.info neg_state.cipher_cs in
         let cipher_sc = Algorithms.Cipher.info neg_state.cipher_sc in
