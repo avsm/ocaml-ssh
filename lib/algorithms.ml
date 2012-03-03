@@ -45,7 +45,7 @@ module Cipher = struct
     | AES_192_CBC -> "aes192-cbc"
     | AES_128_CBC -> "aes128-cbc"
     | Arcfour -> "arcfour"
-    | None -> "anil"
+    | None -> "none"
 
     let from_string = function
     | "3des-cbc" -> TripleDES_CBC
@@ -54,7 +54,6 @@ module Cipher = struct
     | "aes128-cbc" -> AES_128_CBC
     | "arcfour" -> Arcfour
     | "none" -> None
-    | "anil" -> None
     | x -> raise (Unknown x)
 
     let info = function
