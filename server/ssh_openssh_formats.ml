@@ -37,7 +37,7 @@ let moduli file primes =
                 let generator = Mpl_stdlib.Mpl_mpint.of_string 
                     (binary_of_hex (Printf.sprintf "%02x" (int_of_string (nth 5)))) in
                 let prime = Mpl_stdlib.Mpl_mpint.of_string (binary_of_hex (nth 6)) in
-                hashtbl_add_to_list primes size (prime, generator)
+                Kex.Methods.DHGex.add_moduli ~primes ~size ~prime ~generator;
                 end
         done;
         with End_of_file -> close_in fin

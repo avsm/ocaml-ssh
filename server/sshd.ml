@@ -50,17 +50,17 @@ class mlsshd_config conf =
 
     (* Initialize a moduli file in OpenSSH format (normally /etc/moduli) *)
     method moduli_init =
-        let primes = Hashtbl.create 1 in
+        let primes = Kex.Methods.DHGex.empty_moduli () in
         try
             Ssh_openssh_formats.moduli moduli_file primes;
             primes;
         with Ssh_openssh_formats.Parse_failure ->
             (* Clear primes to be safe *)
-            Hashtbl.clear primes;
+            let primes = Kex.Methods.DHGex.empty_moduli () in
             let g1p,g1g = Kex.Methods.public_parameters Kex.Methods.DiffieHellmanGroup1SHA1 in
             let g14p,g14g = Kex.Methods.public_parameters Kex.Methods.DiffieHellmanGroup14SHA1 in
-            hashtbl_add_to_list primes 1024l (g1p,g1g);
-            hashtbl_add_to_list primes 2048l (g14p,g14g);
+            Kex.Methods.DHGex.add_moduli ~primes ~size:1024l ~prime:g1p ~generator:g1g;
+            Kex.Methods.DHGex.add_moduli ~primes ~size:2048l ~prime:g14p ~generator:g14g;
             primes
 
     (* Check to see if a banner should be displayed to the user at
