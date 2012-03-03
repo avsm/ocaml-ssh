@@ -49,7 +49,7 @@ class env conf server_conf = object(self)
   val mutable transport_state = Initial
 
   (* List of successful authentications for this session *)
-  val mutable auth_successes = ([]:Ssh_userauth.t list)
+  val mutable auth_successes = ([]:Userauth.t list)
   (* A username we have authenticated with *)
   val mutable auth_username = (None:string option)
 
@@ -244,11 +244,11 @@ class env conf server_conf = object(self)
       (server_conf#auth_banner x#user_name);
     self#auth_response false
     |`Req (`Password (`Request x)) ->
-    self#check_auth_method x#service x#user_name Ssh_userauth.Password;
+    self#check_auth_method x#service x#user_name Userauth.Password;
     let attempt_auth, further_req =
       server_conf#auth_password x#user_name x#password in
     if attempt_auth then begin
-      auth_successes <- Ssh_userauth.Password :: auth_successes;
+      auth_successes <- Userauth.Password :: auth_successes;
       self#auth_response ~lib_req_auths:further_req true
     end else begin
       self#auth_response false
@@ -296,7 +296,7 @@ class env conf server_conf = object(self)
       if List.length notsucc_auths = 0 then
         raise (self#disconnect `No_more_auth_methods_available);
       self#xmit (Message.Auth.Failure.t
-        ~auth_continue:(Ssh_userauth.to_string notsucc_auths)
+        ~auth_continue:(Userauth.to_string notsucc_auths)
         ~partial_success:s :> xmit_t)
     end
 

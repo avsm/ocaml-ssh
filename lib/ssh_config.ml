@@ -26,7 +26,7 @@ module Server = struct
        other methods might be on the basis of username.  The contents
        of this list MUST also be in the globally supported auth list
        returned by auth_methods_supported. *)
-    type auth_response = bool * Ssh_userauth.t list
+    type auth_response = bool * Userauth.t list
     type exec_response =
         (int * Unix.file_descr option * Unix.file_descr option * Unix.file_descr option) option
 
@@ -42,7 +42,7 @@ end
     
 class type client_config = object
     method verify_hostkey: Keys.PublicKey.t -> bool
-    method auth_choose: Ssh_userauth.t list -> Ssh_userauth.t option
+    method auth_choose: Userauth.t list -> Userauth.t option
     method auth_banner: string -> unit
     method auth_username: string
     method auth_password: string
@@ -60,7 +60,7 @@ class type server_config = object
        (actually only in response to an Auth.Req.None at the moment *)
     method auth_banner : string -> string option
     (* List of all the supported authentication methods *)
-    method auth_methods_supported : Ssh_userauth.t list
+    method auth_methods_supported : Userauth.t list
     (* Callback to validate a username/password *)
     method auth_password : string -> string -> Server.auth_response
     (* Callback to validate a username/publickey *)

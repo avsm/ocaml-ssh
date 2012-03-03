@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 4720bf57ff593effcd2f808f275bd069)
+# DO NOT EDIT (digest: 488176651c91d029395bd1bc4e4648ff)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -42,8 +42,8 @@
 "lib/Ssh_server.cmx": for-pack(Ssh)
 "lib/ssh_transport.cmx": for-pack(Ssh)
 "lib/Ssh_transport.cmx": for-pack(Ssh)
-"lib/ssh_userauth.cmx": for-pack(Ssh)
-"lib/Ssh_userauth.cmx": for-pack(Ssh)
+"lib/userauth.cmx": for-pack(Ssh)
+"lib/Userauth.cmx": for-pack(Ssh)
 "lib/ssh_utils.cmx": for-pack(Ssh)
 "lib/Ssh_utils.cmx": for-pack(Ssh)
 "lib/version.cmx": for-pack(Ssh)

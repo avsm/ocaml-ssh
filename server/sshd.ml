@@ -69,12 +69,12 @@ class mlsshd_config conf =
         Some "Nex rules!!\n"
 
     (* Methods which must all succeed for successful authentication *)
-    method auth_methods_supported : Ssh_userauth.t list =
-        [Ssh_userauth.Public_key; Ssh_userauth.Password]
+    method auth_methods_supported : Userauth.t list =
+        [Userauth.Public_key; Userauth.Password]
     
     (* Callback for password auth, also requests a public key auth *)
-    method auth_password username password : bool * Ssh_userauth.t list =
-        let _ = [Ssh_userauth.Public_key] in
+    method auth_password username password : bool * Userauth.t list =
+        let _ = [Userauth.Public_key] in
         let x = [] in
         let _ = (username = "avsm" && password = "wibble"), x in
         true, x
@@ -82,7 +82,7 @@ class mlsshd_config conf =
     (* Callback for public key auth, always succeeds for now
        but also requests password auth *)
     method auth_public_key (user_name:string) (pubkey:Message.Key.o) =
-        let x = if true then [] else [Ssh_userauth.Password] in
+        let x = if true then [] else [Userauth.Password] in
         true, x
 
     (* We dont care what the client says, just reply with our own
