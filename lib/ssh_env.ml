@@ -1,4 +1,3 @@
-(*pp cpp *)
 (*
  * Copyright (c) 2005,2006 Anil Madhavapeddy <anil@recoil.org>
  *
@@ -14,7 +13,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * $Id: ssh_env.ml,v 1.25 2006/03/17 02:55:43 avsm Exp $
  *)
 
 open Printf
@@ -45,10 +43,10 @@ type conn = {
 type negotiation_state = {
     client_kexinit : string;
     server_kexinit : string;
-    cipher_cs : Ssh_algorithms.Cipher.t;
-    cipher_sc : Ssh_algorithms.Cipher.t;
-    mac_cs : Ssh_algorithms.MAC.t;
-    mac_sc : Ssh_algorithms.MAC.t;
+    cipher_cs : Algorithms.Cipher.t;
+    cipher_sc : Algorithms.Cipher.t;
+    mac_cs : Algorithms.MAC.t;
+    mac_sc : Algorithms.MAC.t;
 }
 
 type xmit = Ssh_transport.Packet.xmit
@@ -113,8 +111,8 @@ class virtual env (conf:Ssh_env_t.t) =
     method private kexinit =
         let bsl = String.concat "," in
         let kexlist = bsl (List.map Ssh_kex.Methods.to_string conf.kex_methods) in
-        let maclist = bsl (List.map Ssh_algorithms.MAC.to_string conf.mac_methods) in
-        let cipherlist = bsl (List.map Ssh_algorithms.Cipher.to_string conf.cipher_methods) in
+        let maclist = bsl (List.map Algorithms.MAC.to_string conf.mac_methods) in
+        let cipherlist = bsl (List.map Algorithms.Cipher.to_string conf.cipher_methods) in
         let hkeylist = bsl (List.map Ssh_keys.PublicKey.to_string conf.hostkey_algorithms) in
         let complist = bsl ["none"] in
         let langlist = bsl [] in
@@ -226,17 +224,17 @@ class virtual env (conf:Ssh_env_t.t) =
             |Some x -> x in
         let derivefn bs x = Ssh_kex.Methods.derive_key (Cryptokit.Hash.sha1)
             shared_secret sess_hash session_id bs x in
-        let cipher_cs = Ssh_algorithms.Cipher.info neg_state.cipher_cs in
-        let cipher_sc = Ssh_algorithms.Cipher.info neg_state.cipher_sc in
-        let mac_cs = Ssh_algorithms.MAC.info neg_state.mac_cs in
-        let mac_sc = Ssh_algorithms.MAC.info neg_state.mac_sc in
+        let cipher_cs = Algorithms.Cipher.info neg_state.cipher_cs in
+        let cipher_sc = Algorithms.Cipher.info neg_state.cipher_sc in
+        let mac_cs = Algorithms.MAC.info neg_state.mac_cs in
+        let mac_sc = Algorithms.MAC.info neg_state.mac_sc in
     
-        let key_size_cs = cipher_cs.Ssh_algorithms.Cipher.key_len in
-        let key_size_sc = cipher_sc.Ssh_algorithms.Cipher.key_len in
-        let block_size_cs = cipher_cs.Ssh_algorithms.Cipher.block_size in
-        let block_size_sc = cipher_sc.Ssh_algorithms.Cipher.block_size in
-        let mac_len_cs = mac_cs.Ssh_algorithms.MAC.key_len in
-        let mac_len_sc = mac_sc.Ssh_algorithms.MAC.key_len in
+        let key_size_cs = cipher_cs.Algorithms.Cipher.key_len in
+        let key_size_sc = cipher_sc.Algorithms.Cipher.key_len in
+        let block_size_cs = cipher_cs.Algorithms.Cipher.block_size in
+        let block_size_sc = cipher_sc.Algorithms.Cipher.block_size in
+        let mac_len_cs = mac_cs.Algorithms.MAC.key_len in
+        let mac_len_sc = mac_sc.Algorithms.MAC.key_len in
         
         let client_to_server_iv = derivefn block_size_cs 'A' in
         let server_to_client_iv = derivefn block_size_sc 'B' in
@@ -253,8 +251,8 @@ class virtual env (conf:Ssh_env_t.t) =
         log#debug ("s->c hash (F): " ^ (hob integrity_server_to_client));
         (* Layering violation here, but just putting this logic here saves
          * passing a load of variables between the derived client/server classes *)
-        let module AC = Ssh_algorithms.Cipher in
-        let module AM = Ssh_algorithms.MAC in
+        let module AC = Algorithms.Cipher in
+        let module AM = Algorithms.MAC in
         if is_server then {
             decrypt_block_size = block_size_cs;
             encrypt_block_size = block_size_sc;

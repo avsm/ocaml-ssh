@@ -13,7 +13,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * $Id: ssh_kex.ml,v 1.10 2006/03/17 02:55:43 avsm Exp $
  *)
 
 (* Key-Exchange stuff ------------------------------------------------ *)
@@ -184,16 +183,16 @@ module Methods = struct
         let s_kex = from_string
             (match_supported "kex" kex) in
         (* Select a client->server cipher *)
-        let s_enc_cs = Ssh_algorithms.Cipher.from_string
+        let s_enc_cs = Algorithms.Cipher.from_string
             (match_supported "encryption_client_server" enc_cs) in
         (* And a server->client cipher *)
-        let s_enc_sc = Ssh_algorithms.Cipher.from_string
+        let s_enc_sc = Algorithms.Cipher.from_string
             (match_supported "encryption_server_client" enc_sc) in
         (* Select client->server MAC *)
-        let s_mac_cs = Ssh_algorithms.MAC.from_string
+        let s_mac_cs = Algorithms.MAC.from_string
             (match_supported "mac_client_server" mac_cs) in
         (* And a server->client MAC *)
-        let s_mac_sc = Ssh_algorithms.MAC.from_string
+        let s_mac_sc = Algorithms.MAC.from_string
             (match_supported "mac_server_client" mac_sc) in
         (* Return em all *)
         (s_kex, s_enc_cs, s_enc_sc, s_mac_cs, s_mac_sc)
