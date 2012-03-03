@@ -17,7 +17,7 @@ Library ssh
   Path:      lib
   Findlibname: ssh
   Pack: true
-  Modules: Tty,Channel,Kex,Algorithms,Message,Mpl_stdlib,Ssh_config,Ssh_env,Ssh_env_t,Ssh_pool,Ssh_server,Ssh_transport,Ssh_userauth,Ssh_utils,Ssh_version,Ssh_classify
+  Modules: Tty,Channel,Kex,Algorithms,Message,Mpl_stdlib,Ssh_config,Ssh_env,Ssh_env_t,Ssh_pool,Ssh_server,Ssh_transport,Ssh_userauth,Ssh_utils,Version,Ssh_classify
   BuildDepends:	lwt.syntax, lwt, cryptokit, ounix
 
 Executable server

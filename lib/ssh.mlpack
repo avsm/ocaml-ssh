@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 6d618f45085816924b1380528f2e0e9f)
+# DO NOT EDIT (digest: 2c160560ab03c524d13198f48f88a4b8)
 Tty
 Channel
 Kex
@@ -14,6 +14,6 @@ Ssh_server
 Ssh_transport
 Ssh_userauth
 Ssh_utils
-Ssh_version
+Version
 Ssh_classify
 # OASIS_STOP

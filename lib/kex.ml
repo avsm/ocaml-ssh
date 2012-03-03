@@ -38,8 +38,8 @@ module Methods = struct
 
     module DHGroup = struct
         type kex_hash = {
-            v_c: Ssh_version.t;           (* clients version *)
-            v_s: Ssh_version.t;           (* servers version *)
+            v_c: Version.t;           (* clients version *)
+            v_s: Version.t;           (* servers version *)
             i_c: string;                            (* clients last kexinit *)
             i_s: string;                            (* servers last kexinit *)
             k_s: string;                            (* servers host key *)
@@ -52,8 +52,8 @@ module Methods = struct
             Ssh_pool.get_string_fn (fun env ->
                 let ms x = ignore(BS.marshal env (BS.of_string x)) in
                 let mp x = ignore(MP.marshal env x) in
-                ms (Ssh_version.to_string args.v_c);
-                ms (Ssh_version.to_string args.v_s);
+                ms (Version.to_string args.v_c);
+                ms (Version.to_string args.v_s);
                 ms args.i_c;
                 ms args.i_s;
                 ms args.k_s;
@@ -65,8 +65,8 @@ module Methods = struct
     
     module DHGex = struct
         type kex_hash = {
-            v_c: Ssh_version.t;   (* clients version string (no \r\n) *)
-            v_s: Ssh_version.t;   (* servers version string (no \r\n) *)
+            v_c: Version.t;   (* clients version string (no \r\n) *)
+            v_s: Version.t;   (* servers version string (no \r\n) *)
             i_c: string;   (* payload of clients last kexinit  *)
             i_s: string;   (* payload of servers last kexinit  *)
             k_s: string;   (* servers host key                 *)
@@ -85,8 +85,8 @@ module Methods = struct
                 let bsm x = ignore(BS.marshal env (BS.of_string x)) in
                 let mpm x = ignore(MP.marshal env x) in
                 let um x = ignore(I32.marshal env (I32.of_int32 x)) in
-                bsm (Ssh_version.to_string a.v_c);
-                bsm (Ssh_version.to_string a.v_s);
+                bsm (Version.to_string a.v_c);
+                bsm (Version.to_string a.v_s);
                 bsm a.i_c;
                 bsm a.i_s;
                 bsm a.k_s;

@@ -24,7 +24,7 @@ exception Unexpected_packet of string
 exception Internal_error of string
 
 let version = {
-    Ssh_version.raw = None;
+    Version.raw = None;
     softwareversion = "MLSSH_0.2";
     protoversion = "2.0"
 }
@@ -53,8 +53,8 @@ type xmit = Ssh_transport.Packet.xmit
 type xmit_t = Ssh_transport.Packet.xmit_t
 
 class virtual env (conf:Ssh_env_t.t) =
-    let _ = conf.fd#write_buf (sprintf "%s\n" (Ssh_version.to_string version)) in
-    let other_version = Ssh_version.unmarshal conf.fd in
+    let _ = conf.fd#write_buf (sprintf "%s\n" (Version.to_string version)) in
+    let other_version = Version.unmarshal conf.fd in
     object(self)
 
     (* Give access to RNG and logging to inherited objects *)
@@ -100,8 +100,8 @@ class virtual env (conf:Ssh_env_t.t) =
     val tx_seq_num = ref (-1l)
 
     (* Virtual methods about versions provided by the concrete implementation *)
-    method virtual server_version : Ssh_version.t
-    method virtual client_version : Ssh_version.t
+    method virtual server_version : Version.t
+    method virtual client_version : Version.t
     method private other_version = other_version
     
     (* Accepts a decrypted environment and provides an OCaml structure for it *)
