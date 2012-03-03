@@ -13,7 +13,6 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
- * $Id: ssh_algorithms.ml,v 1.5 2006/02/20 12:11:12 avsm Exp $
  *)
 
 open Cryptokit
@@ -127,14 +126,13 @@ module MAC = struct
     | SHA1_96 -> "hmac-sha1-96"
     | MD5 -> "hmac-md5"
     | MD5_96 -> "hmac-md5-96"
-    | None -> "anilmac"
+    | None -> "none"
     
     let from_string = function
     | "hmac-sha1" -> SHA1
     | "hmac-sha-96" -> SHA1_96
     | "hmac-md5" -> MD5
     | "hmac-md5-96" -> MD5_96
-    | "anilmac" -> None
     | "none" -> None
     | x -> raise (Unknown x)
    
