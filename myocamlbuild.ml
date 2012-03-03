@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 3d6a9029b9f8641993ad50a999f2533a) *)
+(* DO NOT EDIT (digest: 437e0c006223bf2c61d4b1337beb474f) *)
 module OASISGettext = struct
 # 21 "/Users/avsm/src/darcs/oasis/src/oasis/OASISGettext.ml"
   
@@ -454,7 +454,7 @@ let package_default =
   {
      MyOCamlbuildBase.lib_ocaml =
        [("ounix/ounix", ["ounix"]); ("lib/ssh", ["lib"])];
-     lib_c = [];
+     lib_c = [("ounix", "ounix", [])];
      flags = [];
      }
   ;;

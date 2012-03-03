@@ -11,6 +11,7 @@ Library ounix
   Path: ounix
   Findlibname: ounix
   Modules: Olog, Ounix
+  CSources: ounix_stubs.c,pty_stubs.c
 
 Library ssh
   Path:      lib
@@ -19,4 +20,12 @@ Library ssh
   Modules: Tty,Channel,Kex,Algorithms,Message,Mpl_stdlib,Ssh_config,Ssh_env,Ssh_env_t,Ssh_pool,Ssh_server,Ssh_transport,Ssh_userauth,Ssh_utils,Ssh_version,Ssh_classify
   BuildDepends:	lwt.syntax, lwt, cryptokit, ounix
 
-  
+Executable server
+  Path:               server
+  MainIs:             sshd.ml
+  Custom:             true
+  CompiledObject:     best
+  Install:            false
+  BuildDepends:       ounix,cryptokit,ssh,str
+
+

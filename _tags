@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 2b6c6fe9f9be2af234cd18e2a6cf8f63)
+# DO NOT EDIT (digest: 54f03c1d3b30275f7fc3a086fdb773bf)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -15,6 +15,7 @@
 "_darcs": not_hygienic
 # Library ounix
 "ounix": include
+<ounix/ounix.{cma,cmxa}>: use_libounix
 # Library ssh
 "lib": include
 "lib/tty.cmx": for-pack(Ssh)
@@ -53,6 +54,20 @@
 <lib/*.ml{,i}>: pkg_lwt.syntax
 <lib/*.ml{,i}>: pkg_lwt
 <lib/*.ml{,i}>: pkg_cryptokit
+# Executable server
+<server/sshd.{native,byte}>: use_ssh
+<server/sshd.{native,byte}>: use_ounix
+<server/sshd.{native,byte}>: pkg_str
+<server/sshd.{native,byte}>: pkg_lwt.syntax
+<server/sshd.{native,byte}>: pkg_lwt
+<server/sshd.{native,byte}>: pkg_cryptokit
+<server/*.ml{,i}>: use_ssh
+<server/*.ml{,i}>: use_ounix
+<server/*.ml{,i}>: pkg_str
+<server/*.ml{,i}>: pkg_lwt.syntax
+<server/*.ml{,i}>: pkg_lwt
+<server/*.ml{,i}>: pkg_cryptokit
+<server/sshd.{native,byte}>: custom
 # OASIS_STOP
 <lib/*>: syntax_camlp4o
 <lib/*>: pkg_lwt.syntax
