@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 266294b3cfa47e6facaf322e91f09582)
+# DO NOT EDIT (digest: 2b6c6fe9f9be2af234cd18e2a6cf8f63)
 # Ignore VCS directories, you can use the same kind of rule outside 
 # OASIS_START/STOP if you want to exclude directories that contains 
 # useless stuff for the build process
@@ -13,8 +13,43 @@
 ".git": not_hygienic
 "_darcs": -traverse
 "_darcs": not_hygienic
+# Library ounix
+"ounix": include
 # Library ssh
 "lib": include
+"lib/tty.cmx": for-pack(Ssh)
+"lib/Tty.cmx": for-pack(Ssh)
+"lib/channel.cmx": for-pack(Ssh)
+"lib/Channel.cmx": for-pack(Ssh)
+"lib/kex.cmx": for-pack(Ssh)
+"lib/Kex.cmx": for-pack(Ssh)
+"lib/algorithms.cmx": for-pack(Ssh)
+"lib/Algorithms.cmx": for-pack(Ssh)
+"lib/message.cmx": for-pack(Ssh)
+"lib/Message.cmx": for-pack(Ssh)
+"lib/mpl_stdlib.cmx": for-pack(Ssh)
+"lib/Mpl_stdlib.cmx": for-pack(Ssh)
+"lib/ssh_config.cmx": for-pack(Ssh)
+"lib/Ssh_config.cmx": for-pack(Ssh)
+"lib/ssh_env.cmx": for-pack(Ssh)
+"lib/Ssh_env.cmx": for-pack(Ssh)
+"lib/ssh_env_t.cmx": for-pack(Ssh)
+"lib/Ssh_env_t.cmx": for-pack(Ssh)
+"lib/ssh_pool.cmx": for-pack(Ssh)
+"lib/Ssh_pool.cmx": for-pack(Ssh)
+"lib/ssh_server.cmx": for-pack(Ssh)
+"lib/Ssh_server.cmx": for-pack(Ssh)
+"lib/ssh_transport.cmx": for-pack(Ssh)
+"lib/Ssh_transport.cmx": for-pack(Ssh)
+"lib/ssh_userauth.cmx": for-pack(Ssh)
+"lib/Ssh_userauth.cmx": for-pack(Ssh)
+"lib/ssh_utils.cmx": for-pack(Ssh)
+"lib/Ssh_utils.cmx": for-pack(Ssh)
+"lib/ssh_version.cmx": for-pack(Ssh)
+"lib/Ssh_version.cmx": for-pack(Ssh)
+"lib/ssh_classify.cmx": for-pack(Ssh)
+"lib/Ssh_classify.cmx": for-pack(Ssh)
+<lib/*.ml{,i}>: use_ounix
 <lib/*.ml{,i}>: pkg_lwt.syntax
 <lib/*.ml{,i}>: pkg_lwt
 <lib/*.ml{,i}>: pkg_cryptokit

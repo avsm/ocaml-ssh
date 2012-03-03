@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 2de1670993d3a10d985aa10f93ee9140) *)
+(* DO NOT EDIT (digest: 3d6a9029b9f8641993ad50a999f2533a) *)
 module OASISGettext = struct
 # 21 "/Users/avsm/src/darcs/oasis/src/oasis/OASISGettext.ml"
   
@@ -452,7 +452,8 @@ end
 open Ocamlbuild_plugin;;
 let package_default =
   {
-     MyOCamlbuildBase.lib_ocaml = [("lib/ssh", ["lib"])];
+     MyOCamlbuildBase.lib_ocaml =
+       [("ounix/ounix", ["ounix"]); ("lib/ssh", ["lib"])];
      lib_c = [];
      flags = [];
      }
@@ -460,7 +461,7 @@ let package_default =
 
 let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
 
-# 464 "myocamlbuild.ml"
+# 465 "myocamlbuild.ml"
 (* OASIS_STOP *)
 
 (* Rules for MPL compiler *)

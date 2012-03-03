@@ -2,14 +2,21 @@ OASISFormat: 0.2
 Name:        ssh
 Version:     0.9-dev
 Synopsis:    SSH protocol and client/server in pure OCaml
-Authors:     Anil Madhavapeddy
+Authors:     Anil Madhavapeddy, David Scott
 License:     ISC
 Plugins:     META (0.2)
 BuildTools:  ocamlbuild
 
+Library ounix
+  Path: ounix
+  Findlibname: ounix
+  Modules: Olog, Ounix
+
 Library ssh
   Path:      lib
   Findlibname: ssh
-  Modules: Ssh_tty,Ssh_channel,Ssh_kex
-  BuildDepends:	lwt.syntax, lwt, cryptokit
+  Pack: true
+  Modules: Tty,Channel,Kex,Algorithms,Message,Mpl_stdlib,Ssh_config,Ssh_env,Ssh_env_t,Ssh_pool,Ssh_server,Ssh_transport,Ssh_userauth,Ssh_utils,Ssh_version,Ssh_classify
+  BuildDepends:	lwt.syntax, lwt, cryptokit, ounix
 
+  
