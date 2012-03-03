@@ -6,3 +6,4 @@ setup.bin
 *.docdir
 *.native
 *.byte
+server.rsa.key
