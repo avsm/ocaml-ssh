@@ -87,7 +87,7 @@ module Packet = struct
         let module M = Mpl_stdlib in
         let txenv = Ssh_pool.get () in
         (* XXX compression not supported yet *)
-        let d env = let pack = data env in () in
+        let d env = let _ = data env in () in
         (* calculate padding *)
         let padding env =
             let align = max block_size 8 in
